@@ -90,23 +90,11 @@
 
         <div class="field-wrap">
           <label class="field-label">Usuario</label>
-          <input
-            type="email"
-            class="field-input"
-            id="loginUser"
-            placeholder="correo@ejemplo.com"
-            autocomplete="off"
-          />
+          <input type="email" class="field-input" id="loginUser" placeholder="correo@ejemplo.com" autocomplete="off"/>
         </div>
 
         <div class="field-wrap">
-          <input
-            type="password"
-            class="field-input"
-            id="loginPass"
-            placeholder="Contraseña"
-            autocomplete="off"
-          />
+          <input type="password" class="field-input" id="loginPass" placeholder="Contraseña" autocomplete="off"/>
         </div>
 
         <button class="btn-login" onclick="handleLogin()">
@@ -154,8 +142,9 @@
   </section>
 
   <!-- ====== MODAL ====== -->
-  <div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
-    <div class="modal-box" onclick="event.stopPropagation()">
+  <!-- IMPORTANTE: el overlay ahora usa display:none/flex por JS, no clase .open -->
+  <div class="modal-overlay" id="modalOverlay" style="display:none" onclick="closeModal()">
+    <div class="modal-box" id="modalBox" onclick="event.stopPropagation()">
 
       <div class="modal-top">
         <div>
