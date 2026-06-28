@@ -2,7 +2,7 @@
 //  SUPABASE — CREDENCIALES
 // =============================================
 const SUPABASE_URL      = 'https://vseltacxhkdrqfqynrmw.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZzZWx0YWN4aGtkcnFmcXlucm13Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2NjQ2MTEsImV4cCI6MjA5ODI0MDYxMX0.hK-IbE52QiV-7DNpCAYF0u1TqYsqI09QOz7a26rTA7M'; // ⚠️ SIN /rest/v1/ al final — eso lo agrega supabase-js automáticamente
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZzZWx0YWN4aGtkcnFmcXlucm13Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2NjQ2MTEsImV4cCI6MjA5ODI0MDYxMX0.hK-IbE52QiV-7DNpCAYF0u1TqYsqI09QOz7a26rTA7M';
 
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -16,11 +16,7 @@ let currentSemId = null;
 let isDark       = true;
 
 // =============================================
-//  HELPER: TIMEOUT PARA LLAMADAS A SUPABASE
-//  Si una consulta se cuelga (proyecto pausado,
-//  problema de red, CORS, etc.) esto evita que la
-//  pantalla se quede pegada en "Cargando..." para
-//  siempre y muestra un error claro.
+//  HELPER: TIMEOUT
 // =============================================
 function withTimeout(promise, ms = 12000) {
   return Promise.race([
@@ -39,7 +35,7 @@ function withTimeout(promise, ms = 12000) {
 // =============================================
 (function () {
   const canvas = document.getElementById('particles-canvas');
-  if (!canvas) return; // por si el id cambia algún día, no rompe el resto del script
+  if (!canvas) return;
   const ctx   = canvas.getContext('2d');
   const parts = [];
 
@@ -81,8 +77,6 @@ function withTimeout(promise, ms = 12000) {
 
 // =============================================
 //  CAMBIO DE TEMA
-//  (usa classList.toggle en vez de .replace,
-//  así no depende de que la clase "vieja" exista)
 // =============================================
 function updateThemeUI() {
   const icon  = document.getElementById('themeIcon');
@@ -101,7 +95,6 @@ function toggleTheme() {
   body.classList.remove('light-mode', 'dark-mode');
   isDark = !isDark;
   body.classList.add(isDark ? 'dark-mode' : 'light-mode');
-
   updateThemeUI();
   localStorage.setItem('theme', isDark ? 'dark' : 'light');
   showToast(isDark ? '🌑 Modo oscuro activado' : '☀️ Modo claro activado');
@@ -111,7 +104,6 @@ function applyTheme() {
   const body  = document.getElementById('body');
   const saved = localStorage.getItem('theme');
   isDark = saved !== 'light';
-
   body.classList.remove('light-mode', 'dark-mode');
   body.classList.add(isDark ? 'dark-mode' : 'light-mode');
   updateThemeUI();
@@ -174,7 +166,7 @@ function addLogoutBtn() {
 }
 
 // =============================================
-//  CARGAR SEMANAS DESDE SUPABASE
+//  CARGAR SEMANAS
 // =============================================
 async function loadSemanas() {
   const grid = document.getElementById('weeksGrid');
@@ -331,7 +323,7 @@ async function fetchFileCount(semId) {
 }
 
 // =============================================
-//  MODAL
+//  MODAL — ANIMACIÓN CARTA
 // =============================================
 async function openModal(semId) {
   currentSemId = semId;
@@ -346,9 +338,23 @@ async function openModal(semId) {
       <div class="spinner"></div>
     </div>`;
 
-  document.getElementById('modalOverlay').classList.add('open');
+  const overlay = document.getElementById('modalOverlay');
+  const box     = document.querySelector('.modal-box');
+
+  // Quitar clase de cierre si existe
+  overlay.classList.remove('closing');
+  box.classList.remove('closing');
+
+  // Activar overlay y animar apertura (carta desplegándose)
+  overlay.classList.add('open');
   document.body.style.overflow = 'hidden';
 
+  // Forzar reflow para que la animación de entrada corra
+  void box.offsetWidth;
+  box.classList.add('opening');
+  setTimeout(() => box.classList.remove('opening'), 500);
+
+  // Cargar archivos
   const container = document.getElementById('modalFiles');
 
   try {
@@ -369,6 +375,7 @@ async function openModal(semId) {
           <div class="file-btns">
             <button class="btn-ver" onclick="window.open('${f.url}','_blank')">👁 Ver</button>
             <button class="btn-dl"  onclick="dlFile('${f.url}','${f.nombre}')">⬇️ Descargar</button>
+            ${isAdmin ? `<button class="btn-del" onclick="deleteFile(${f.id}, '${f.url}', this)">🗑 Eliminar</button>` : ''}
           </div>
         `;
         container.appendChild(row);
@@ -396,9 +403,19 @@ async function openModal(semId) {
 }
 
 function closeModal() {
-  document.getElementById('modalOverlay').classList.remove('open');
-  document.body.style.overflow = '';
-  currentSemId = null;
+  const overlay = document.getElementById('modalOverlay');
+  const box     = document.querySelector('.modal-box');
+
+  // Animación de cierre (carta doblándose de vuelta al sobre)
+  box.classList.add('closing');
+  overlay.classList.add('closing');
+
+  setTimeout(() => {
+    overlay.classList.remove('open', 'closing');
+    box.classList.remove('closing');
+    document.body.style.overflow = '';
+    currentSemId = null;
+  }, 420);
 }
 
 function dlFile(url, nombre) {
@@ -407,6 +424,55 @@ function dlFile(url, nombre) {
   a.download = nombre;
   a.target   = '_blank';
   a.click();
+}
+
+// =============================================
+//  ELIMINAR ARCHIVO (solo admin)
+// =============================================
+async function deleteFile(fileId, fileUrl, btnEl) {
+  if (!isAdmin) return;
+  if (!confirm('¿Eliminar este archivo? Esta acción no se puede deshacer.')) return;
+
+  btnEl.disabled = true;
+  btnEl.textContent = '⏳';
+
+  try {
+    // Extraer path del storage desde la URL pública
+    // URL tiene formato: .../storage/v1/object/public/portafolio-archivos/semana-X/timestamp-nombre
+    const marker = '/portafolio-archivos/';
+    const storagePath = fileUrl.includes(marker)
+      ? fileUrl.split(marker)[1]
+      : null;
+
+    // Eliminar de Storage si se pudo extraer el path
+    if (storagePath) {
+      const { error: storErr } = await withTimeout(
+        db.storage.from('portafolio-archivos').remove([storagePath])
+      );
+      if (storErr) console.warn('Advertencia al eliminar del storage:', storErr.message);
+    }
+
+    // Eliminar registro de la tabla archivos
+    const { error: dbErr } = await withTimeout(
+      db.from('archivos').delete().eq('id', fileId)
+    );
+    if (dbErr) throw dbErr;
+
+    // Remover la fila del DOM con animación
+    const row = btnEl.closest('.file-row');
+    row.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+    row.style.opacity    = '0';
+    row.style.transform  = 'translateX(20px)';
+    setTimeout(() => row.remove(), 310);
+
+    fetchFileCount(currentSemId);
+    showToast('🗑 Archivo eliminado');
+  } catch (err) {
+    console.error('Error al eliminar archivo:', err);
+    showToast('❌ ' + err.message);
+    btnEl.disabled = false;
+    btnEl.textContent = '🗑 Eliminar';
+  }
 }
 
 // =============================================
