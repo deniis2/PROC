@@ -16,22 +16,19 @@ let currentSemId = null;
 let isDark       = true;
 
 // =============================================
-//  HELPER: TIMEOUT
+//  TIMEOUT HELPER
 // =============================================
 function withTimeout(promise, ms = 12000) {
   return Promise.race([
     promise,
     new Promise((_, reject) =>
-      setTimeout(
-        () => reject(new Error('Tiempo de espera agotado. Revisa tu conexión o si el proyecto de Supabase está activo.')),
-        ms
-      )
+      setTimeout(() => reject(new Error('Tiempo de espera agotado.')), ms)
     ),
   ]);
 }
 
 // =============================================
-//  PARTÍCULAS DE FONDO
+//  PARTÍCULAS
 // =============================================
 (function () {
   const canvas = document.getElementById('particles-canvas');
@@ -76,7 +73,7 @@ function withTimeout(promise, ms = 12000) {
 })();
 
 // =============================================
-//  CAMBIO DE TEMA
+//  TEMA
 // =============================================
 function updateThemeUI() {
   const icon  = document.getElementById('themeIcon');
@@ -92,8 +89,8 @@ function updateThemeUI() {
 
 function toggleTheme() {
   const body = document.getElementById('body');
-  body.classList.remove('light-mode', 'dark-mode');
   isDark = !isDark;
+  body.classList.remove('light-mode', 'dark-mode');
   body.classList.add(isDark ? 'dark-mode' : 'light-mode');
   updateThemeUI();
   localStorage.setItem('theme', isDark ? 'dark' : 'light');
@@ -142,14 +139,13 @@ async function handleLogin() {
       renderWeeks(semanasData);
     }, 900);
   } catch (err) {
-    console.error('Login error:', err);
     setMsg(msg, '❌ ' + err.message, 'error');
   }
 }
 
 function setMsg(el, text, cls) {
   el.textContent = text;
-  el.className   = cls ? `login-msg ${cls}` : 'login-msg';
+  el.className   = cls ? 'login-msg ' + cls : 'login-msg';
 }
 
 function addLogoutBtn() {
@@ -170,44 +166,32 @@ function addLogoutBtn() {
 // =============================================
 async function loadSemanas() {
   const grid = document.getElementById('weeksGrid');
-  grid.innerHTML = `
-    <div class="loading-box">
-      <div class="spinner"></div>
-      <p>Cargando semanas...</p>
-    </div>`;
+  grid.innerHTML = '<div class="loading-box"><div class="spinner"></div><p>Cargando semanas...</p></div>';
 
   try {
     const { data, error } = await withTimeout(
       db.from('semanas').select('*').order('orden')
     );
-
     if (error) throw error;
 
     semanasData = data || [];
     updateProgress(semanasData);
     renderWeeks(semanasData);
   } catch (err) {
-    console.error('Supabase error (loadSemanas):', err);
-    grid.innerHTML = `
-      <div class="loading-box">
-        <p style="color:var(--red); text-align:center; max-width:420px;">
-          ⚠️ Error al cargar: ${err.message || 'revisa la consola del navegador.'}
-        </p>
-      </div>`;
+    grid.innerHTML = '<div class="loading-box"><p style="color:var(--red);text-align:center;max-width:420px;">⚠️ Error al cargar: ' + (err.message || 'revisa la consola.') + '</p></div>';
   }
 }
 
 // =============================================
-//  BARRA DE PROGRESO
+//  PROGRESO
 // =============================================
 function updateProgress(data) {
   const done  = data.filter(s => s.completado).length;
   const total = data.length;
   const pct   = total ? Math.round((done / total) * 100) : 0;
-
-  document.getElementById('progressFraction').textContent = `${done}/${total}`;
-  document.getElementById('progressPct').textContent      = `${pct}% completado`;
-  document.getElementById('progressBar').style.width      = `${pct}%`;
+  document.getElementById('progressFraction').textContent = done + '/' + total;
+  document.getElementById('progressPct').textContent      = pct + '% completado';
+  document.getElementById('progressBar').style.width      = pct + '%';
 }
 
 // =============================================
@@ -218,49 +202,39 @@ function renderWeeks(data) {
   grid.innerHTML = '';
 
   if (!data || data.length === 0) {
-    grid.innerHTML = `
-      <div class="loading-box">
-        <p>No hay semanas registradas todavía. Agrega filas en la tabla "semanas" de Supabase.</p>
-      </div>`;
+    grid.innerHTML = '<div class="loading-box"><p>No hay semanas registradas todavía.</p></div>';
     return;
   }
 
-  data.forEach((sem, i) => {
-    const card = document.createElement('div');
+  data.forEach(function(sem, i) {
+    const card   = document.createElement('div');
     card.className = 'week-card';
-    card.style.animationDelay = `${i * 0.04}s`;
+    card.style.animationDelay = (i * 0.04) + 's';
 
     const done   = sem.completado;
     const pClass = done ? 'done' : 'pending';
     const pText  = done ? '✓ Completado' : '○ Pendiente';
 
-    card.innerHTML = `
-      <div class="card-top">
-        <span class="card-week-badge">Semana ${sem.numero}</span>
-        <label class="tog-wrap" onclick="event.stopPropagation()">
-          <input
-            type="checkbox"
-            class="tog-input"
-            id="tog-${sem.id}"
-            ${done   ? 'checked'  : ''}
-            ${isAdmin ? ''        : 'disabled'}
-            onchange="toggleSemana(${sem.id}, this.checked)"
-          />
-          <span class="tog-track"></span>
-        </label>
-      </div>
+    card.innerHTML =
+      '<div class="card-top">' +
+        '<span class="card-week-badge">Semana ' + sem.numero + '</span>' +
+        '<label class="tog-wrap" onclick="event.stopPropagation()">' +
+          '<input type="checkbox" class="tog-input" id="tog-' + sem.id + '"' +
+            (done   ? ' checked'  : '') +
+            (isAdmin ? '' : ' disabled') +
+            ' onchange="toggleSemana(' + sem.id + ', this.checked)"/>' +
+          '<span class="tog-track"></span>' +
+        '</label>' +
+      '</div>' +
+      '<h3 class="card-title">Semana ' + sem.numero + ' — ' + sem.titulo + '</h3>' +
+      '<p class="card-desc">' + sem.descripcion + '</p>' +
+      '<div class="card-bottom">' +
+        '<span class="status-pill ' + pClass + '" id="pill-' + sem.id + '">' + pText + '</span>' +
+        '<span class="card-files-count" id="fc-' + sem.id + '">📄 …</span>' +
+        '<span class="card-view-link" onclick="openModal(' + sem.id + ')">Ver archivos →</span>' +
+      '</div>';
 
-      <h3 class="card-title">Semana ${sem.numero} — ${sem.titulo}</h3>
-      <p  class="card-desc">${sem.descripcion}</p>
-
-      <div class="card-bottom">
-        <span class="status-pill ${pClass}" id="pill-${sem.id}">${pText}</span>
-        <span class="card-files-count" id="fc-${sem.id}">📄 …</span>
-        <span class="card-view-link"   onclick="openModal(${sem.id})">Ver archivos →</span>
-      </div>
-    `;
-
-    card.addEventListener('click', e => {
+    card.addEventListener('click', function(e) {
       if (!e.target.closest('.tog-wrap') && !e.target.closest('.card-view-link')) {
         openModal(sem.id);
       }
@@ -272,35 +246,32 @@ function renderWeeks(data) {
 }
 
 // =============================================
-//  TOGGLE DE SEMANA (solo admin)
+//  TOGGLE SEMANA
 // =============================================
 async function toggleSemana(id, checked) {
   if (!isAdmin) return;
-
   try {
     const { error } = await withTimeout(
       db.from('semanas').update({ completado: checked }).eq('id', id)
     );
     if (error) throw error;
 
-    const sem = semanasData.find(s => s.id === id);
+    const sem = semanasData.find(function(s) { return s.id === id; });
     if (sem) sem.completado = checked;
-
     updateProgress(semanasData);
 
-    const pill = document.getElementById(`pill-${id}`);
-    pill.className   = `status-pill ${checked ? 'done' : 'pending'}`;
+    const pill = document.getElementById('pill-' + id);
+    pill.className   = 'status-pill ' + (checked ? 'done' : 'pending');
     pill.textContent = checked ? '✓ Completado' : '○ Pendiente';
 
     showToast(checked ? '✅ Semana completada' : '⏳ Marcada como pendiente');
   } catch (err) {
-    console.error('Supabase error (toggleSemana):', err);
-    showToast('❌ Error al actualizar: ' + err.message);
+    showToast('❌ Error: ' + err.message);
   }
 }
 
 // =============================================
-//  CONTEO DE ARCHIVOS
+//  CONTEO ARCHIVOS
 // =============================================
 async function fetchFileCount(semId) {
   try {
@@ -308,116 +279,159 @@ async function fetchFileCount(semId) {
       db.from('archivos').select('*', { count: 'exact', head: true }).eq('semana_id', semId)
     );
     if (error) throw error;
-
-    const el = document.getElementById(`fc-${semId}`);
-    if (el) {
-      el.textContent = count > 0
-        ? `📄 ${count} archivo${count !== 1 ? 's' : ''}`
-        : 'Sin archivos';
-    }
+    const el = document.getElementById('fc-' + semId);
+    if (el) el.textContent = count > 0 ? '📄 ' + count + ' archivo' + (count !== 1 ? 's' : '') : 'Sin archivos';
   } catch (err) {
-    console.error('Supabase error (fetchFileCount):', err);
-    const el = document.getElementById(`fc-${semId}`);
+    const el = document.getElementById('fc-' + semId);
     if (el) el.textContent = '⚠️ N/D';
   }
 }
 
 // =============================================
-//  MODAL — ANIMACIÓN CARTA
+//  MODAL — ABRIR CON ANIMACIÓN CARTA
 // =============================================
 async function openModal(semId) {
   currentSemId = semId;
-  const sem = semanasData.find(s => s.id === semId);
+  const sem = semanasData.find(function(s) { return s.id === semId; });
   if (!sem) return;
 
-  document.getElementById('modalBadge').textContent = `Semana ${sem.numero}`;
-  document.getElementById('modalTitle').textContent  = `Semana ${sem.numero} — ${sem.titulo}`;
+  document.getElementById('modalBadge').textContent = 'Semana ' + sem.numero;
+  document.getElementById('modalTitle').textContent  = 'Semana ' + sem.numero + ' — ' + sem.titulo;
   document.getElementById('modalDesc').textContent   = sem.descripcion_larga || sem.descripcion;
-  document.getElementById('modalFiles').innerHTML    = `
-    <div class="loading-box" style="padding:1.2rem">
-      <div class="spinner"></div>
-    </div>`;
+  document.getElementById('modalFiles').innerHTML    = '<div class="loading-box" style="padding:1.2rem"><div class="spinner"></div></div>';
 
   const overlay = document.getElementById('modalOverlay');
-  const box     = document.querySelector('.modal-box');
+  const box     = document.getElementById('modalBox');
 
-  // Quitar clase de cierre si existe
-  overlay.classList.remove('closing');
-  box.classList.remove('closing');
-
-  // Activar overlay y animar apertura (carta desplegándose)
-  overlay.classList.add('open');
+  // Reset estado
+  box.classList.remove('carta-abriendo', 'carta-cerrando');
+  overlay.style.display    = 'flex';
+  overlay.style.opacity    = '0';
   document.body.style.overflow = 'hidden';
 
-  // Forzar reflow para que la animación de entrada corra
+  // Forzar reflow
   void box.offsetWidth;
-  box.classList.add('opening');
-  setTimeout(() => box.classList.remove('opening'), 500);
+
+  // Fade in overlay + animar carta abriéndose
+  overlay.style.transition = 'opacity 0.3s ease';
+  overlay.style.opacity    = '1';
+  box.classList.add('carta-abriendo');
 
   // Cargar archivos
   const container = document.getElementById('modalFiles');
-
   try {
     const { data: files, error } = await withTimeout(
       db.from('archivos').select('*').eq('semana_id', semId)
     );
     if (error) throw error;
 
+    container.innerHTML = '';
+
     if (!files || files.length === 0) {
-      container.innerHTML = `<p class="no-files-msg">Sin archivos por ahora.</p>`;
+      container.innerHTML = '<p class="no-files-msg">Sin archivos por ahora.</p>';
     } else {
-      container.innerHTML = '';
-      files.forEach(f => {
+      files.forEach(function(f) {
         const row = document.createElement('div');
         row.className = 'file-row';
-        row.innerHTML = `
-          <span class="file-name">📄 ${f.nombre}</span>
-          <div class="file-btns">
-            <button class="btn-ver" onclick="window.open('${f.url}','_blank')">👁 Ver</button>
-            <button class="btn-dl"  onclick="dlFile('${f.url}','${f.nombre}')">⬇️ Descargar</button>
-            ${isAdmin ? `<button class="btn-del" onclick="deleteFile(${f.id}, '${f.url}', this)">🗑 Eliminar</button>` : ''}
-          </div>
-        `;
+        row.id = 'frow-' + f.id;
+
+        var btnsHtml =
+          '<button class="btn-ver" onclick="window.open(\'' + f.url + '\',\'_blank\')">👁 Ver</button>' +
+          '<button class="btn-dl" onclick="dlFile(\'' + f.url + '\',\'' + f.nombre + '\')">⬇️ Descargar</button>';
+
+        if (isAdmin) {
+          btnsHtml += '<button class="btn-del" id="bdel-' + f.id + '" onclick="deleteFile(' + f.id + ',\'' + f.url + '\',' + semId + ')">🗑 Eliminar</button>';
+        }
+
+        row.innerHTML =
+          '<span class="file-name">📄 ' + f.nombre + '</span>' +
+          '<div class="file-btns">' + btnsHtml + '</div>';
+
         container.appendChild(row);
       });
     }
   } catch (err) {
-    console.error('Supabase error (openModal):', err);
-    container.innerHTML = `<p class="no-files-msg" style="color:var(--red)">⚠️ Error al cargar archivos.</p>`;
+    container.innerHTML = '<p class="no-files-msg" style="color:var(--red)">⚠️ Error al cargar archivos.</p>';
   }
 
-  // Zona de subida solo para admin
+  // Zona de subida (solo admin)
   if (isAdmin) {
     const zone = document.createElement('div');
-    zone.className = 'upload-zone visible';
-    zone.innerHTML = `
-      <input type="file" id="fileInput" accept=".pdf,.docx,.sql,.txt,.xlsx"
-        style="display:none" onchange="uploadFile(this)"/>
-      <button class="btn-upload" onclick="document.getElementById('fileInput').click()">
-        + Subir archivo
-      </button>
-      <p>PDF · DOCX · SQL · Max 10 MB</p>
-    `;
+    zone.className = 'upload-zone';
+    zone.innerHTML =
+      '<input type="file" id="fileInput" accept=".pdf,.docx,.sql,.txt,.xlsx" style="display:none" onchange="uploadFile(this)"/>' +
+      '<button class="btn-upload" onclick="document.getElementById(\'fileInput\').click()">+ Subir archivo</button>' +
+      '<p>PDF · DOCX · SQL · Max 10 MB</p>';
     container.appendChild(zone);
   }
 }
 
+// =============================================
+//  MODAL — CERRAR CON ANIMACIÓN CARTA
+// =============================================
 function closeModal() {
   const overlay = document.getElementById('modalOverlay');
-  const box     = document.querySelector('.modal-box');
+  const box     = document.getElementById('modalBox');
 
-  // Animación de cierre (carta doblándose de vuelta al sobre)
-  box.classList.add('closing');
-  overlay.classList.add('closing');
+  box.classList.remove('carta-abriendo');
+  box.classList.add('carta-cerrando');
 
-  setTimeout(() => {
-    overlay.classList.remove('open', 'closing');
-    box.classList.remove('closing');
+  overlay.style.transition = 'opacity 0.38s ease';
+  overlay.style.opacity    = '0';
+
+  setTimeout(function() {
+    overlay.style.display = 'none';
+    overlay.style.opacity = '';
+    box.classList.remove('carta-cerrando');
     document.body.style.overflow = '';
     currentSemId = null;
   }, 420);
 }
 
+// =============================================
+//  ELIMINAR ARCHIVO
+// =============================================
+async function deleteFile(fileId, fileUrl, semId) {
+  if (!isAdmin) return;
+  if (!confirm('¿Eliminar este archivo? Esta acción no se puede deshacer.')) return;
+
+  const btn = document.getElementById('bdel-' + fileId);
+  if (btn) { btn.disabled = true; btn.textContent = '⏳'; }
+
+  try {
+    // Extraer path del storage
+    const marker = '/portafolio-archivos/';
+    if (fileUrl.includes(marker)) {
+      const storagePath = fileUrl.split(marker)[1];
+      await withTimeout(db.storage.from('portafolio-archivos').remove([storagePath]));
+    }
+
+    // Eliminar de la tabla
+    const { error } = await withTimeout(
+      db.from('archivos').delete().eq('id', fileId)
+    );
+    if (error) throw error;
+
+    // Animar salida y remover fila
+    const row = document.getElementById('frow-' + fileId);
+    if (row) {
+      row.style.transition = 'opacity 0.28s ease, transform 0.28s ease';
+      row.style.opacity    = '0';
+      row.style.transform  = 'translateX(20px)';
+      setTimeout(function() { row.remove(); }, 300);
+    }
+
+    fetchFileCount(semId);
+    showToast('🗑 Archivo eliminado correctamente');
+  } catch (err) {
+    showToast('❌ Error: ' + err.message);
+    if (btn) { btn.disabled = false; btn.textContent = '🗑 Eliminar'; }
+  }
+}
+
+// =============================================
+//  DESCARGAR
+// =============================================
 function dlFile(url, nombre) {
   const a    = document.createElement('a');
   a.href     = url;
@@ -427,64 +441,14 @@ function dlFile(url, nombre) {
 }
 
 // =============================================
-//  ELIMINAR ARCHIVO (solo admin)
-// =============================================
-async function deleteFile(fileId, fileUrl, btnEl) {
-  if (!isAdmin) return;
-  if (!confirm('¿Eliminar este archivo? Esta acción no se puede deshacer.')) return;
-
-  btnEl.disabled = true;
-  btnEl.textContent = '⏳';
-
-  try {
-    // Extraer path del storage desde la URL pública
-    // URL tiene formato: .../storage/v1/object/public/portafolio-archivos/semana-X/timestamp-nombre
-    const marker = '/portafolio-archivos/';
-    const storagePath = fileUrl.includes(marker)
-      ? fileUrl.split(marker)[1]
-      : null;
-
-    // Eliminar de Storage si se pudo extraer el path
-    if (storagePath) {
-      const { error: storErr } = await withTimeout(
-        db.storage.from('portafolio-archivos').remove([storagePath])
-      );
-      if (storErr) console.warn('Advertencia al eliminar del storage:', storErr.message);
-    }
-
-    // Eliminar registro de la tabla archivos
-    const { error: dbErr } = await withTimeout(
-      db.from('archivos').delete().eq('id', fileId)
-    );
-    if (dbErr) throw dbErr;
-
-    // Remover la fila del DOM con animación
-    const row = btnEl.closest('.file-row');
-    row.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-    row.style.opacity    = '0';
-    row.style.transform  = 'translateX(20px)';
-    setTimeout(() => row.remove(), 310);
-
-    fetchFileCount(currentSemId);
-    showToast('🗑 Archivo eliminado');
-  } catch (err) {
-    console.error('Error al eliminar archivo:', err);
-    showToast('❌ ' + err.message);
-    btnEl.disabled = false;
-    btnEl.textContent = '🗑 Eliminar';
-  }
-}
-
-// =============================================
-//  SUBIR ARCHIVO A SUPABASE STORAGE
+//  SUBIR ARCHIVO
 // =============================================
 async function uploadFile(input) {
   const file = input.files[0];
   if (!file || !currentSemId) return;
 
   showToast('⏳ Subiendo archivo...');
-
-  const path = `semana-${currentSemId}/${Date.now()}-${file.name}`;
+  const path = 'semana-' + currentSemId + '/' + Date.now() + '-' + file.name;
 
   try {
     const { error: upErr } = await withTimeout(
@@ -508,7 +472,6 @@ async function uploadFile(input) {
     fetchFileCount(currentSemId);
     openModal(currentSemId);
   } catch (err) {
-    console.error('Supabase error (uploadFile):', err);
     showToast('❌ ' + err.message);
   }
 }
@@ -516,22 +479,23 @@ async function uploadFile(input) {
 // =============================================
 //  TOAST
 // =============================================
-function showToast(msg, ms = 3000) {
+function showToast(msg, ms) {
+  ms = ms || 3000;
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), ms);
+  setTimeout(function() { t.classList.remove('show'); }, ms);
 }
 
 // =============================================
-//  NAV ACTIVO
+//  NAV
 // =============================================
 function setActiveNav(el) {
-  document.querySelectorAll('.nav-link').forEach(a => a.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(function(a) { a.classList.remove('active'); });
   el.classList.add('active');
 }
 
-window.addEventListener('scroll', () => {
+window.addEventListener('scroll', function() {
   document.getElementById('navbar').style.boxShadow =
     window.scrollY > 20 ? '0 4px 32px rgba(0,0,0,0.35)' : 'none';
 });
@@ -539,11 +503,11 @@ window.addEventListener('scroll', () => {
 // =============================================
 //  TECLAS RÁPIDAS
 // =============================================
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('loginUser').addEventListener('keydown', e => {
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('loginUser').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') document.getElementById('loginPass').focus();
   });
-  document.getElementById('loginPass').addEventListener('keydown', e => {
+  document.getElementById('loginPass').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') handleLogin();
   });
 });
