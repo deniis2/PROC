@@ -361,7 +361,7 @@ async function openModal(semId) {
     zone.innerHTML =
       '<input type="file" id="fileInput" accept=".pdf,.docx,.sql,.txt,.xlsx" style="display:none" onchange="uploadFile(this)"/>' +
       '<button class="btn-upload" onclick="document.getElementById(\'fileInput\').click()">+ Subir archivo</button>' +
-      '<p>PDF · DOCX · SQL · Max 10 MB</p>';
+      '<p>PDF · DOCX · SQL · Max 50 MB</p>';
     container.appendChild(zone);
   }
 }
@@ -448,7 +448,10 @@ async function uploadFile(input) {
   if (!file || !currentSemId) return;
 
   showToast('⏳ Subiendo archivo...');
-  const path = 'semana-' + currentSemId + '/' + Date.now() + '-' + file.name;
+  const safeName = file.name
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9._-]/g, '_');
+  const path = 'semana-' + currentSemId + '/' + Date.now() + '-' + safeName;
 
   try {
     const { error: upErr } = await withTimeout(
