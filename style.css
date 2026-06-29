@@ -19,6 +19,14 @@
   --input-bg:   #0c0c18;
   --tog-off:    rgba(255,255,255,0.14);
   --shadow:     rgba(0,0,0,0.55);
+
+  /* COMIC BORDERS */
+  --comic-border:       2px solid rgba(255,255,255,0.18);
+  --comic-shadow:       3px 3px 0px rgba(255,255,255,0.08);
+  --comic-border-red:   2px solid rgba(224,49,49,0.55);
+  --comic-shadow-red:   3px 3px 0px rgba(224,49,49,0.18);
+  --comic-border-hover: 2px solid rgba(224,49,49,0.75);
+  --comic-shadow-hover: 4px 4px 0px rgba(224,49,49,0.28);
 }
 
 body.light-mode {
@@ -34,6 +42,13 @@ body.light-mode {
   --input-bg: #ececf4;
   --tog-off:  rgba(0,0,0,0.14);
   --shadow:   rgba(0,0,0,0.10);
+
+  --comic-border:       2px solid rgba(0,0,0,0.22);
+  --comic-shadow:       3px 3px 0px rgba(0,0,0,0.10);
+  --comic-border-red:   2px solid rgba(224,49,49,0.50);
+  --comic-shadow-red:   3px 3px 0px rgba(224,49,49,0.15);
+  --comic-border-hover: 2px solid rgba(224,49,49,0.80);
+  --comic-shadow-hover: 4px 4px 0px rgba(224,49,49,0.22);
 }
 
 body.light-mode .week-card,
@@ -41,14 +56,14 @@ body.light-mode .login-card,
 body.light-mode .progress-box,
 body.light-mode .modal-box {
   background: #fffaf9;
-  border: 1px solid rgba(224,49,49,0.16);
-  box-shadow: 0 12px 32px rgba(224,49,49,0.08), 0 2px 10px rgba(13,13,26,0.06);
+  border: var(--comic-border-red);
+  box-shadow: var(--comic-shadow-red);
 }
 
 body.light-mode .week-card::before { transform: scaleX(1); opacity: 0.5; }
 body.light-mode .week-card:hover::before { opacity: 1; }
 body.light-mode .week-card:hover {
-  box-shadow: 0 20px 44px rgba(224,49,49,0.14), 0 4px 14px rgba(13,13,26,0.08);
+  box-shadow: var(--comic-shadow-hover);
 }
 
 /* =============================================
@@ -92,7 +107,8 @@ body {
   background: var(--nav-bg);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 2px solid rgba(224,49,49,0.25);
+  box-shadow: 0 2px 0 rgba(224,49,49,0.10);
   transition: background 0.35s ease, border-color 0.35s ease, box-shadow 0.3s ease;
 }
 
@@ -104,7 +120,8 @@ body {
   border-radius: 10px;
   display: flex; align-items: center; justify-content: center;
   font-weight: 900; font-size: 13px; color: #fff;
-  box-shadow: 0 0 18px var(--red-glow);
+  border: 2px solid rgba(255,255,255,0.25);
+  box-shadow: 2px 2px 0px rgba(160,20,20,0.7);
   flex-shrink: 0;
 }
 
@@ -142,8 +159,9 @@ body {
 .theme-toggle {
   display: flex; align-items: center; gap: 6px;
   background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 20px;
+  border: var(--comic-border);
+  box-shadow: var(--comic-shadow);
+  border-radius: 10px;
   padding: 7px 16px;
   cursor: pointer;
   font-family: 'Inter', sans-serif;
@@ -154,8 +172,8 @@ body {
 
 .theme-toggle:hover {
   border-color: var(--red);
-  box-shadow: 0 0 12px var(--red-glow);
-  transform: scale(1.04);
+  box-shadow: var(--comic-shadow-red);
+  transform: translate(-1px, -1px);
 }
 
 .theme-icon { font-size: 14px; line-height: 1; }
@@ -163,8 +181,9 @@ body {
 .online-badge {
   display: flex; align-items: center; gap: 7px;
   background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 20px;
+  border: var(--comic-border);
+  box-shadow: var(--comic-shadow);
+  border-radius: 10px;
   padding: 7px 16px;
   font-size: 12px; font-weight: 600;
   color: var(--text);
@@ -198,8 +217,9 @@ body {
 .hero-badge {
   display: inline-flex; align-items: center; gap: 8px;
   background: rgba(224,49,49,0.10);
-  border: 1px solid rgba(224,49,49,0.28);
-  border-radius: 20px;
+  border: 2px solid rgba(224,49,49,0.45);
+  box-shadow: 2px 2px 0px rgba(224,49,49,0.20);
+  border-radius: 10px;
   padding: 6px 15px;
   font-size: 12px; font-weight: 600; color: var(--red);
   margin-bottom: 1.6rem;
@@ -251,16 +271,16 @@ body {
 .stat-divider { width: 1px; height: 42px; background: var(--border); }
 
 /* =============================================
-   LOGIN CARD
+   LOGIN CARD — ESTILO COMIC
 ============================================= */
 .hero-right { flex-shrink: 0; width: 100%; max-width: 440px; }
 
 .login-card {
   background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 24px;
+  border: var(--comic-border-red);
+  box-shadow: var(--comic-shadow-red);
+  border-radius: 18px;
   padding: 2.4rem 2rem 2rem;
-  box-shadow: 0 28px 70px var(--shadow);
   animation: fadeRight 0.7s ease both;
   transition: background 0.35s ease, border-color 0.35s ease;
 }
@@ -269,10 +289,11 @@ body {
 
 .login-icon {
   width: 54px; height: 54px;
-  background: var(--red); border-radius: 14px;
+  background: var(--red); border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
   font-size: 24px; color: #fff;
-  box-shadow: 0 0 24px var(--red-glow);
+  border: 2px solid rgba(255,255,255,0.25);
+  box-shadow: 3px 3px 0px rgba(160,20,20,0.6);
 }
 
 .login-title { font-size: 1.25rem; font-weight: 800; color: var(--text); text-align: center; margin-bottom: 4px; }
@@ -292,16 +313,19 @@ body {
 .field-input {
   width: 100%;
   background: var(--input-bg);
-  border: 1.5px solid var(--border);
+  border: 2px solid rgba(255,255,255,0.10);
   border-radius: 10px;
   padding: 14px;
   font-size: 0.875rem; color: var(--text);
   font-family: 'Inter', sans-serif;
   outline: none;
-  transition: border-color 0.2s, background 0.35s ease;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.35s ease;
 }
 
-.field-input:focus       { border-color: var(--red); }
+.field-input:focus {
+  border-color: var(--red);
+  box-shadow: 2px 2px 0px rgba(224,49,49,0.25);
+}
 .field-input::placeholder { color: var(--faint); }
 
 .btn-login {
@@ -310,18 +334,23 @@ body {
   background: var(--red); color: #fff;
   font-family: 'Inter', sans-serif;
   font-size: 0.95rem; font-weight: 700;
-  border: none; border-radius: 10px;
+  border: 2px solid rgba(255,255,255,0.20);
+  box-shadow: 3px 3px 0px rgba(160,20,20,0.6);
+  border-radius: 10px;
   cursor: pointer;
-  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  transition: background 0.2s, transform 0.1s, box-shadow 0.1s;
 }
 
 .btn-login:hover {
   background: var(--red-dark);
-  transform: translateY(-2px);
-  box-shadow: 0 10px 28px var(--red-glow);
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0px rgba(160,20,20,0.6);
 }
 
-.btn-login:active { transform: translateY(0); }
+.btn-login:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0px rgba(160,20,20,0.6);
+}
 
 .login-msg { font-size: 12px; text-align: center; margin-top: 10px; min-height: 18px; color: var(--muted); }
 .login-msg.error   { color: var(--red); }
@@ -348,8 +377,9 @@ body {
 .progress-box {
   display: flex; align-items: center; gap: 12px;
   background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 16px;
+  border: var(--comic-border-red);
+  box-shadow: var(--comic-shadow-red);
+  border-radius: 14px;
   padding: 14px 20px;
   min-width: 280px; max-width: 360px;
   transition: background 0.35s ease, border-color 0.35s ease;
@@ -375,35 +405,36 @@ body {
 }
 
 /* =============================================
-   TARJETA DE SEMANA
+   TARJETA DE SEMANA — ESTILO COMIC
 ============================================= */
 .week-card {
   position: relative;
   background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 18px;
+  border: var(--comic-border);
+  box-shadow: var(--comic-shadow);
+  border-radius: 16px;
   padding: 1.5rem;
   cursor: pointer;
   overflow: hidden;
   animation: fadeUp 0.4s ease both;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.35s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.2s ease, background 0.35s ease;
 }
 
 .week-card::before {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
-  height: 2px;
+  height: 3px;
   background: var(--red);
-  border-radius: 2px 2px 0 0;
+  border-radius: 0;
   transform: scaleX(0);
   transition: transform 0.3s ease;
 }
 
 .week-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 18px 48px var(--shadow);
-  border-color: rgba(224,49,49,0.3);
+  transform: translate(-2px, -3px);
+  box-shadow: var(--comic-shadow-hover);
+  border-color: rgba(224,49,49,0.55);
 }
 
 .week-card:hover::before { transform: scaleX(1); }
@@ -416,7 +447,8 @@ body {
 .card-week-badge {
   font-size: 11px; font-weight: 700; color: var(--red);
   background: rgba(224,49,49,0.10);
-  border: 1px solid rgba(224,49,49,0.22);
+  border: 2px solid rgba(224,49,49,0.35);
+  box-shadow: 1px 1px 0px rgba(224,49,49,0.20);
   border-radius: 8px; padding: 3px 10px;
 }
 
@@ -425,19 +457,20 @@ body {
 .tog-track {
   position: absolute; inset: 0;
   background: var(--tog-off);
+  border: 2px solid rgba(255,255,255,0.12);
   border-radius: 25px;
   cursor: pointer;
   transition: background 0.3s ease;
 }
 .tog-track::after {
   content: '';
-  position: absolute; top: 3px; left: 3px;
-  width: 19px; height: 19px;
+  position: absolute; top: 2px; left: 2px;
+  width: 17px; height: 17px;
   background: #ffffff; border-radius: 50%;
   transition: transform 0.3s ease;
-  box-shadow: 0 1px 5px rgba(0,0,0,0.3);
+  box-shadow: 1px 1px 0px rgba(0,0,0,0.3);
 }
-.tog-input:checked + .tog-track              { background: var(--green); }
+.tog-input:checked + .tog-track              { background: var(--green); border-color: rgba(47,158,68,0.4); }
 .tog-input:checked + .tog-track::after       { transform: translateX(19px); }
 
 .card-title { font-size: 1rem; font-weight: 800; color: var(--text); margin-bottom: 5px; line-height: 1.3; }
@@ -453,8 +486,16 @@ body {
   font-size: 11px; font-weight: 700;
   border-radius: 8px; padding: 4px 11px;
 }
-.status-pill.done    { background: rgba(47,158,68,0.12);  color: var(--green);  border: 1px solid rgba(47,158,68,0.25); }
-.status-pill.pending { background: rgba(230,119,0,0.12);  color: var(--orange); border: 1px solid rgba(230,119,0,0.25); }
+.status-pill.done    {
+  background: rgba(47,158,68,0.12);  color: var(--green);
+  border: 2px solid rgba(47,158,68,0.35);
+  box-shadow: 1px 1px 0px rgba(47,158,68,0.15);
+}
+.status-pill.pending {
+  background: rgba(230,119,0,0.12);  color: var(--orange);
+  border: 2px solid rgba(230,119,0,0.35);
+  box-shadow: 1px 1px 0px rgba(230,119,0,0.15);
+}
 
 .card-files-count { font-size: 11px; color: var(--faint); }
 .card-view-link   { font-size: 12px; color: var(--faint); cursor: pointer; transition: color 0.2s; white-space: nowrap; }
@@ -484,7 +525,7 @@ body {
   background: rgba(0,0,0,0.75);
   backdrop-filter: blur(7px);
   -webkit-backdrop-filter: blur(7px);
-  display: none;          /* JS lo pone flex cuando abre */
+  display: none;
   align-items: center;
   justify-content: center;
   padding: 1.5rem;
@@ -530,19 +571,18 @@ body {
 }
 
 /* =============================================
-   MODAL BOX
+   MODAL BOX — ESTILO COMIC
 ============================================= */
 .modal-box {
   background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 22px;
+  border: var(--comic-border-red);
+  box-shadow: 5px 5px 0px rgba(224,49,49,0.30), 0 36px 90px rgba(0,0,0,0.6);
+  border-radius: 20px;
   padding: 2rem;
-  width: 100%; max-width: 520px;
+  width: 100%; max-width: 560px;
   max-height: 85vh;
   overflow-y: auto;
-  box-shadow: 0 36px 90px rgba(0,0,0,0.6);
   transition: background 0.35s ease;
-  /* Estado inicial antes de cualquier animación */
   opacity: 0;
 }
 
@@ -554,7 +594,6 @@ body {
   animation: cartaCerrar 0.38s cubic-bezier(0.6, 0, 0.8, 0.2) forwards;
 }
 
-/* Cuando está abierto y sin animación activa, asegura visibilidad */
 .modal-overlay[style*="flex"] .modal-box:not(.carta-abriendo):not(.carta-cerrando) {
   opacity: 1;
 }
@@ -571,7 +610,8 @@ body {
   display: inline-block;
   font-size: 11px; font-weight: 700; color: var(--red);
   background: rgba(224,49,49,0.10);
-  border: 1px solid rgba(224,49,49,0.22);
+  border: 2px solid rgba(224,49,49,0.35);
+  box-shadow: 1px 1px 0px rgba(224,49,49,0.18);
   border-radius: 8px; padding: 3px 10px;
   margin-bottom: 6px;
 }
@@ -579,17 +619,25 @@ body {
 .modal-title { font-size: 1.15rem; font-weight: 800; color: var(--text); }
 
 .modal-close-btn {
-  background: none; border: none;
+  background: none;
+  border: 2px solid var(--border);
+  box-shadow: 1px 1px 0px rgba(255,255,255,0.06);
   font-size: 1.1rem; color: var(--muted);
   cursor: pointer; padding: 6px 8px; border-radius: 8px;
-  transition: background 0.2s, color 0.2s;
+  transition: background 0.2s, color 0.2s, box-shadow 0.1s, transform 0.1s;
   flex-shrink: 0;
 }
-.modal-close-btn:hover { background: var(--border); color: var(--text); }
+.modal-close-btn:hover {
+  background: var(--border);
+  color: var(--text);
+  transform: translate(-1px, -1px);
+  box-shadow: 2px 2px 0px rgba(255,255,255,0.10);
+}
 
 .modal-desc-box {
   background: var(--bg2);
-  border-radius: 12px;
+  border: var(--comic-border);
+  border-radius: 10px;
   padding: 1rem 1.1rem;
   margin-bottom: 1.5rem;
   font-size: 0.875rem; color: var(--muted); line-height: 1.65;
@@ -599,90 +647,256 @@ body {
 .modal-files-heading { font-size: 0.9rem; font-weight: 700; color: var(--red); margin-bottom: 0.8rem; }
 
 /* =============================================
-   FILAS DE ARCHIVO
+   FILAS DE ARCHIVO — FIX LAYOUT + ESTILO COMIC
+   Estructura: nombre en una fila, botones en la de abajo
 ============================================= */
 .file-row {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 14px;
-  background: var(--bg2); border-radius: 10px; margin-bottom: 8px;
-  transition: background 0.35s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  background: var(--bg2);
+  border: var(--comic-border);
+  box-shadow: var(--comic-shadow);
+  border-radius: 10px;
+  margin-bottom: 8px;
+  transition: background 0.35s ease, border-color 0.2s, box-shadow 0.2s;
 }
 
-.file-name { font-size: 0.84rem; color: var(--text); display: flex; align-items: center; gap: 8px; }
+.file-row:hover {
+  border-color: rgba(224,49,49,0.40);
+  box-shadow: 2px 2px 0px rgba(224,49,49,0.15);
+}
 
-.file-btns { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.file-name {
+  font-size: 0.84rem;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  word-break: break-all;
+  line-height: 1.4;
+  font-weight: 500;
+}
+
+.file-name-icon {
+  flex-shrink: 0;
+  font-size: 16px;
+}
+
+/* URLs tienen estilos especiales */
+.file-row.is-url .file-name { color: #74b9ff; }
+.file-row.is-url .file-name-icon { color: #74b9ff; }
+
+.file-btns {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
 
 /* Botones de archivo — base compartida */
 .btn-ver, .btn-dl, .btn-del {
   font-family: 'Inter', sans-serif;
-  font-size: 11px; font-weight: 600;
+  font-size: 11px; font-weight: 700;
   border-radius: 8px; padding: 5px 12px;
   cursor: pointer;
-  transition: background 0.2s, transform 0.15s;
-  border: 1px solid transparent;
+  transition: background 0.15s, transform 0.1s, box-shadow 0.1s;
+  border: 2px solid transparent;
+  white-space: nowrap;
 }
+
+.btn-ver:hover, .btn-dl:hover { transform: translate(-1px, -1px); }
 
 /* Ver */
 .btn-ver {
   background: rgba(255,255,255,0.07);
   color: var(--text);
-  border-color: var(--border);
+  border-color: rgba(255,255,255,0.15);
+  box-shadow: 1px 1px 0px rgba(255,255,255,0.06);
 }
-.btn-ver:hover { background: rgba(255,255,255,0.14); }
+.btn-ver:hover {
+  background: rgba(255,255,255,0.14);
+  box-shadow: 2px 2px 0px rgba(255,255,255,0.10);
+}
 
 /* Descargar */
 .btn-dl {
   background: rgba(49,130,224,0.14);
   color: #74b9ff;
-  border-color: rgba(49,130,224,0.24);
+  border-color: rgba(49,130,224,0.30);
+  box-shadow: 1px 1px 0px rgba(49,130,224,0.15);
 }
-.btn-dl:hover { background: rgba(49,130,224,0.26); }
+.btn-dl:hover {
+  background: rgba(49,130,224,0.26);
+  box-shadow: 2px 2px 0px rgba(49,130,224,0.20);
+}
 
 /* Eliminar */
 .btn-del {
   background: rgba(224,49,49,0.13);
   color: var(--red);
-  border-color: rgba(224,49,49,0.28);
+  border-color: rgba(224,49,49,0.35);
+  box-shadow: 1px 1px 0px rgba(224,49,49,0.15);
 }
-.btn-del:hover  { background: rgba(224,49,49,0.26); transform: scale(1.04); }
-.btn-del:active { transform: scale(0.97); }
-.btn-del:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+.btn-del:hover  {
+  background: rgba(224,49,49,0.26);
+  transform: translate(-1px, -1px);
+  box-shadow: 2px 2px 0px rgba(224,49,49,0.25);
+}
+.btn-del:active { transform: translate(1px, 1px); box-shadow: none; }
+.btn-del:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
 
 .no-files-msg { font-size: 0.84rem; color: var(--faint); text-align: center; padding: 1.2rem; }
 
 /* =============================================
-   UPLOAD ZONE
+   TABS DE SUBIR / URL — ESTILO COMIC
+============================================= */
+.upload-tabs {
+  display: flex;
+  gap: 0;
+  margin-top: 1rem;
+  border: var(--comic-border-red);
+  box-shadow: var(--comic-shadow-red);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.upload-tab {
+  flex: 1;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px; font-weight: 700;
+  padding: 9px 0;
+  background: transparent;
+  color: var(--muted);
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  border-right: 2px solid rgba(224,49,49,0.25);
+}
+
+.upload-tab:last-child { border-right: none; }
+
+.upload-tab.active {
+  background: rgba(224,49,49,0.13);
+  color: var(--red);
+}
+
+.upload-tab:hover:not(.active) {
+  background: rgba(255,255,255,0.05);
+  color: var(--text);
+}
+
+.upload-panel {
+  padding: 1rem 0 0;
+  display: none;
+}
+.upload-panel.active { display: block; }
+
+/* =============================================
+   UPLOAD ZONE — ESTILO COMIC
 ============================================= */
 .upload-zone {
-  border: 2px dashed var(--border);
-  border-radius: 12px;
+  border: 2px dashed rgba(224,49,49,0.35);
+  border-radius: 10px;
   padding: 1.4rem;
   text-align: center;
-  margin-top: 1rem;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, background 0.2s;
 }
-.upload-zone:hover { border-color: var(--red); }
-.upload-zone p     { font-size: 0.78rem; color: var(--muted); margin-top: 7px; }
+.upload-zone:hover {
+  border-color: var(--red);
+  background: rgba(224,49,49,0.04);
+}
+.upload-zone p { font-size: 0.78rem; color: var(--muted); margin-top: 7px; }
 
 .btn-upload {
   font-family: 'Inter', sans-serif;
   font-size: 13px; font-weight: 700;
   background: var(--red); color: #fff;
-  border: none; border-radius: 9px;
+  border: 2px solid rgba(255,255,255,0.20);
+  box-shadow: 2px 2px 0px rgba(160,20,20,0.55);
+  border-radius: 9px;
   padding: 8px 22px; cursor: pointer;
-  transition: background 0.2s, transform 0.15s;
+  transition: background 0.2s, transform 0.1s, box-shadow 0.1s;
 }
-.btn-upload:hover { background: var(--red-dark); transform: translateY(-1px); }
+.btn-upload:hover {
+  background: var(--red-dark);
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0px rgba(160,20,20,0.55);
+}
+.btn-upload:active {
+  transform: translate(1px, 1px);
+  box-shadow: none;
+}
+
+/* URL INPUT PANEL */
+.url-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.url-label-txt {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  margin-bottom: 6px;
+  display: block;
+}
+
+.url-name-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.field-input-sm {
+  flex: 1;
+  background: var(--input-bg);
+  border: 2px solid rgba(255,255,255,0.10);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 0.82rem; color: var(--text);
+  font-family: 'Inter', sans-serif;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.field-input-sm:focus {
+  border-color: var(--red);
+  box-shadow: 2px 2px 0px rgba(224,49,49,0.20);
+}
+.field-input-sm::placeholder { color: var(--faint); }
+
+.btn-add-url {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px; font-weight: 700;
+  background: rgba(49,130,224,0.18);
+  color: #74b9ff;
+  border: 2px solid rgba(49,130,224,0.35);
+  box-shadow: 2px 2px 0px rgba(49,130,224,0.15);
+  border-radius: 8px;
+  padding: 10px 16px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, transform 0.1s, box-shadow 0.1s;
+}
+.btn-add-url:hover {
+  background: rgba(49,130,224,0.30);
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0px rgba(49,130,224,0.20);
+}
+.btn-add-url:active { transform: translate(1px,1px); box-shadow: none; }
 
 /* =============================================
-   TOAST
+   TOAST — ESTILO COMIC
 ============================================= */
 .toast-msg {
   position: fixed; bottom: 2rem; right: 2rem; z-index: 9999;
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: 12px; padding: 12px 22px;
-  font-size: 13px; font-weight: 600; color: var(--text);
-  box-shadow: 0 10px 35px var(--shadow);
+  background: var(--card);
+  border: var(--comic-border-red);
+  box-shadow: 3px 3px 0px rgba(224,49,49,0.25);
+  border-radius: 10px; padding: 12px 22px;
+  font-size: 13px; font-weight: 700; color: var(--text);
   opacity: 0; pointer-events: none;
   transform: translateY(12px);
   transition: opacity 0.3s ease, transform 0.3s ease;
@@ -720,4 +934,5 @@ body {
   .weeks-grid { grid-template-columns: 1fr; }
   .hero-title { font-size: 2.2rem; }
   .modal-box  { padding: 1.4rem; }
+  .url-name-row { flex-direction: column; }
 }
