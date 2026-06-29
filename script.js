@@ -14,27 +14,48 @@ let isAdmin      = false;
 let semanasData  = [];
 let currentSemId = null;
 let isDark       = true;
+let activeTab    = 'file'; // 'file' | 'url'
 
 // =============================================
 //  TIMEOUT HELPER
 // =============================================
-function withTimeout(promise, ms = 12000) {
+function withTimeout(promise, ms) {
+  ms = ms || 12000;
   return Promise.race([
     promise,
-    new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('Tiempo de espera agotado.')), ms)
-    ),
+    new Promise(function(_, reject) {
+      setTimeout(function() { reject(new Error('Tiempo de espera agotado.')); }, ms);
+    }),
   ]);
+}
+
+// =============================================
+//  DETECTAR TIPO DE URL (para ícono)
+// =============================================
+function getUrlIcon(url, nombre) {
+  var u = (url || '').toLowerCase();
+  var n = (nombre || '').toLowerCase();
+  if (u.includes('youtube.com') || u.includes('youtu.be')) return '▶️';
+  if (u.includes('drive.google.com'))  return '📂';
+  if (u.includes('docs.google.com'))   return '📝';
+  if (u.includes('github.com'))        return '💻';
+  if (u.includes('figma.com'))         return '🎨';
+  if (n.endsWith('.pdf') || u.endsWith('.pdf')) return '📕';
+  if (n.endsWith('.docx') || n.endsWith('.doc')) return '📄';
+  if (n.endsWith('.xlsx') || n.endsWith('.xls')) return '📊';
+  if (n.endsWith('.sql'))              return '🗄️';
+  if (n.endsWith('.txt'))              return '📃';
+  return '🔗';
 }
 
 // =============================================
 //  PARTÍCULAS
 // =============================================
 (function () {
-  const canvas = document.getElementById('particles-canvas');
+  var canvas = document.getElementById('particles-canvas');
   if (!canvas) return;
-  const ctx   = canvas.getContext('2d');
-  const parts = [];
+  var ctx   = canvas.getContext('2d');
+  var parts = [];
 
   function resize() {
     canvas.width  = window.innerWidth;
@@ -43,7 +64,7 @@ function withTimeout(promise, ms = 12000) {
   resize();
   window.addEventListener('resize', resize);
 
-  for (let i = 0; i < 130; i++) {
+  for (var i = 0; i < 130; i++) {
     parts.push({
       x:     Math.random() * window.innerWidth,
       y:     Math.random() * window.innerHeight,
@@ -56,11 +77,11 @@ function withTimeout(promise, ms = 12000) {
 
   function loop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const rgb = isDark ? '224,49,49' : '160,20,20';
-    parts.forEach(p => {
+    var rgb = isDark ? '224,49,49' : '160,20,20';
+    parts.forEach(function(p) {
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(${rgb},${p.alpha})`;
+      ctx.fillStyle = 'rgba(' + rgb + ',' + p.alpha + ')';
       ctx.fill();
       p.x += p.vx;
       p.y += p.vy;
@@ -76,8 +97,8 @@ function withTimeout(promise, ms = 12000) {
 //  TEMA
 // =============================================
 function updateThemeUI() {
-  const icon  = document.getElementById('themeIcon');
-  const label = document.getElementById('themeLabel');
+  var icon  = document.getElementById('themeIcon');
+  var label = document.getElementById('themeLabel');
   if (isDark) {
     icon.textContent  = '☀️';
     label.textContent = 'Claro';
@@ -88,7 +109,7 @@ function updateThemeUI() {
 }
 
 function toggleTheme() {
-  const body = document.getElementById('body');
+  var body = document.getElementById('body');
   isDark = !isDark;
   body.classList.remove('light-mode', 'dark-mode');
   body.classList.add(isDark ? 'dark-mode' : 'light-mode');
@@ -98,8 +119,8 @@ function toggleTheme() {
 }
 
 function applyTheme() {
-  const body  = document.getElementById('body');
-  const saved = localStorage.getItem('theme');
+  var body  = document.getElementById('body');
+  var saved = localStorage.getItem('theme');
   isDark = saved !== 'light';
   body.classList.remove('light-mode', 'dark-mode');
   body.classList.add(isDark ? 'dark-mode' : 'light-mode');
@@ -110,9 +131,9 @@ function applyTheme() {
 //  LOGIN
 // =============================================
 async function handleLogin() {
-  const email = document.getElementById('loginUser').value.trim();
-  const pass  = document.getElementById('loginPass').value.trim();
-  const msg   = document.getElementById('loginMsg');
+  var email = document.getElementById('loginUser').value.trim();
+  var pass  = document.getElementById('loginPass').value.trim();
+  var msg   = document.getElementById('loginMsg');
 
   if (!email || !pass) {
     setMsg(msg, 'Completa ambos campos.', 'error');
@@ -122,9 +143,9 @@ async function handleLogin() {
   setMsg(msg, 'Verificando...', '');
 
   try {
-    const { error } = await withTimeout(db.auth.signInWithPassword({ email, password: pass }));
+    var result = await withTimeout(db.auth.signInWithPassword({ email: email, password: pass }));
 
-    if (error) {
+    if (result.error) {
       setMsg(msg, '❌ Credenciales incorrectas.', 'error');
       return;
     }
@@ -133,7 +154,7 @@ async function handleLogin() {
     setMsg(msg, '✅ ¡Acceso concedido!', 'success');
     showToast('✅ Panel de administración activado');
 
-    setTimeout(() => {
+    setTimeout(function() {
       document.getElementById('loginCard').style.display = 'none';
       addLogoutBtn();
       renderWeeks(semanasData);
@@ -149,12 +170,12 @@ function setMsg(el, text, cls) {
 }
 
 function addLogoutBtn() {
-  const navRight = document.querySelector('.nav-right');
-  const btn = document.createElement('button');
+  var navRight = document.querySelector('.nav-right');
+  var btn = document.createElement('button');
   btn.className   = 'theme-toggle';
   btn.style.color = '#e03131';
   btn.textContent = '🔓 Salir';
-  btn.onclick     = async () => {
+  btn.onclick     = async function() {
     await db.auth.signOut();
     location.reload();
   };
@@ -165,16 +186,16 @@ function addLogoutBtn() {
 //  CARGAR SEMANAS
 // =============================================
 async function loadSemanas() {
-  const grid = document.getElementById('weeksGrid');
+  var grid = document.getElementById('weeksGrid');
   grid.innerHTML = '<div class="loading-box"><div class="spinner"></div><p>Cargando semanas...</p></div>';
 
   try {
-    const { data, error } = await withTimeout(
+    var result = await withTimeout(
       db.from('semanas').select('*').order('orden')
     );
-    if (error) throw error;
+    if (result.error) throw result.error;
 
-    semanasData = data || [];
+    semanasData = result.data || [];
     updateProgress(semanasData);
     renderWeeks(semanasData);
   } catch (err) {
@@ -186,9 +207,9 @@ async function loadSemanas() {
 //  PROGRESO
 // =============================================
 function updateProgress(data) {
-  const done  = data.filter(s => s.completado).length;
-  const total = data.length;
-  const pct   = total ? Math.round((done / total) * 100) : 0;
+  var done  = data.filter(function(s) { return s.completado; }).length;
+  var total = data.length;
+  var pct   = total ? Math.round((done / total) * 100) : 0;
   document.getElementById('progressFraction').textContent = done + '/' + total;
   document.getElementById('progressPct').textContent      = pct + '% completado';
   document.getElementById('progressBar').style.width      = pct + '%';
@@ -198,7 +219,7 @@ function updateProgress(data) {
 //  RENDERIZAR TARJETAS
 // =============================================
 function renderWeeks(data) {
-  const grid = document.getElementById('weeksGrid');
+  var grid = document.getElementById('weeksGrid');
   grid.innerHTML = '';
 
   if (!data || data.length === 0) {
@@ -207,13 +228,13 @@ function renderWeeks(data) {
   }
 
   data.forEach(function(sem, i) {
-    const card   = document.createElement('div');
+    var card   = document.createElement('div');
     card.className = 'week-card';
     card.style.animationDelay = (i * 0.04) + 's';
 
-    const done   = sem.completado;
-    const pClass = done ? 'done' : 'pending';
-    const pText  = done ? '✓ Completado' : '○ Pendiente';
+    var done   = sem.completado;
+    var pClass = done ? 'done' : 'pending';
+    var pText  = done ? '✓ Completado' : '○ Pendiente';
 
     card.innerHTML =
       '<div class="card-top">' +
@@ -251,16 +272,16 @@ function renderWeeks(data) {
 async function toggleSemana(id, checked) {
   if (!isAdmin) return;
   try {
-    const { error } = await withTimeout(
+    var result = await withTimeout(
       db.from('semanas').update({ completado: checked }).eq('id', id)
     );
-    if (error) throw error;
+    if (result.error) throw result.error;
 
-    const sem = semanasData.find(function(s) { return s.id === id; });
+    var sem = semanasData.find(function(s) { return s.id === id; });
     if (sem) sem.completado = checked;
     updateProgress(semanasData);
 
-    const pill = document.getElementById('pill-' + id);
+    var pill = document.getElementById('pill-' + id);
     pill.className   = 'status-pill ' + (checked ? 'done' : 'pending');
     pill.textContent = checked ? '✓ Completado' : '○ Pendiente';
 
@@ -275,14 +296,15 @@ async function toggleSemana(id, checked) {
 // =============================================
 async function fetchFileCount(semId) {
   try {
-    const { count, error } = await withTimeout(
+    var result = await withTimeout(
       db.from('archivos').select('*', { count: 'exact', head: true }).eq('semana_id', semId)
     );
-    if (error) throw error;
-    const el = document.getElementById('fc-' + semId);
+    if (result.error) throw result.error;
+    var count = result.count;
+    var el = document.getElementById('fc-' + semId);
     if (el) el.textContent = count > 0 ? '📄 ' + count + ' archivo' + (count !== 1 ? 's' : '') : 'Sin archivos';
   } catch (err) {
-    const el = document.getElementById('fc-' + semId);
+    var el = document.getElementById('fc-' + semId);
     if (el) el.textContent = '⚠️ N/D';
   }
 }
@@ -292,7 +314,7 @@ async function fetchFileCount(semId) {
 // =============================================
 async function openModal(semId) {
   currentSemId = semId;
-  const sem = semanasData.find(function(s) { return s.id === semId; });
+  var sem = semanasData.find(function(s) { return s.id === semId; });
   if (!sem) return;
 
   document.getElementById('modalBadge').textContent = 'Semana ' + sem.numero;
@@ -300,30 +322,27 @@ async function openModal(semId) {
   document.getElementById('modalDesc').textContent   = sem.descripcion_larga || sem.descripcion;
   document.getElementById('modalFiles').innerHTML    = '<div class="loading-box" style="padding:1.2rem"><div class="spinner"></div></div>';
 
-  const overlay = document.getElementById('modalOverlay');
-  const box     = document.getElementById('modalBox');
+  var overlay = document.getElementById('modalOverlay');
+  var box     = document.getElementById('modalBox');
 
-  // Reset estado
   box.classList.remove('carta-abriendo', 'carta-cerrando');
   overlay.style.display    = 'flex';
   overlay.style.opacity    = '0';
   document.body.style.overflow = 'hidden';
 
-  // Forzar reflow
   void box.offsetWidth;
 
-  // Fade in overlay + animar carta abriéndose
   overlay.style.transition = 'opacity 0.3s ease';
   overlay.style.opacity    = '1';
   box.classList.add('carta-abriendo');
 
-  // Cargar archivos
-  const container = document.getElementById('modalFiles');
+  var container = document.getElementById('modalFiles');
   try {
-    const { data: files, error } = await withTimeout(
+    var result = await withTimeout(
       db.from('archivos').select('*').eq('semana_id', semId)
     );
-    if (error) throw error;
+    if (result.error) throw result.error;
+    var files = result.data;
 
     container.innerHTML = '';
 
@@ -331,23 +350,7 @@ async function openModal(semId) {
       container.innerHTML = '<p class="no-files-msg">Sin archivos por ahora.</p>';
     } else {
       files.forEach(function(f) {
-        const row = document.createElement('div');
-        row.className = 'file-row';
-        row.id = 'frow-' + f.id;
-
-        var btnsHtml =
-          '<button class="btn-ver" onclick="window.open(\'' + f.url + '\',\'_blank\')">👁 Ver</button>' +
-          '<button class="btn-dl" onclick="dlFile(\'' + f.url + '\',\'' + f.nombre + '\')">⬇️ Descargar</button>';
-
-        if (isAdmin) {
-          btnsHtml += '<button class="btn-del" id="bdel-' + f.id + '" onclick="deleteFile(' + f.id + ',\'' + f.url + '\',' + semId + ')">🗑 Eliminar</button>';
-        }
-
-        row.innerHTML =
-          '<span class="file-name">📄 ' + f.nombre + '</span>' +
-          '<div class="file-btns">' + btnsHtml + '</div>';
-
-        container.appendChild(row);
+        container.appendChild(buildFileRow(f, semId));
       });
     }
   } catch (err) {
@@ -356,22 +359,103 @@ async function openModal(semId) {
 
   // Zona de subida (solo admin)
   if (isAdmin) {
-    const zone = document.createElement('div');
-    zone.className = 'upload-zone';
-    zone.innerHTML =
-      '<input type="file" id="fileInput" accept=".pdf,.docx,.sql,.txt,.xlsx" style="display:none" onchange="uploadFile(this)"/>' +
-      '<button class="btn-upload" onclick="document.getElementById(\'fileInput\').click()">+ Subir archivo</button>' +
-      '<p>PDF · DOCX · SQL · Max 50 MB</p>';
-    container.appendChild(zone);
+    container.appendChild(buildUploadZone());
   }
+}
+
+// =============================================
+//  CONSTRUIR FILA DE ARCHIVO
+// =============================================
+function buildFileRow(f, semId) {
+  var isUrl = f.tipo === 'url';
+  var row = document.createElement('div');
+  row.className = 'file-row' + (isUrl ? ' is-url' : '');
+  row.id = 'frow-' + f.id;
+
+  var icon = getUrlIcon(f.url, f.nombre);
+
+  var btnsHtml =
+    '<button class="btn-ver" onclick="window.open(\'' + f.url.replace(/'/g, "\\'") + '\',\'_blank\')">👁 Ver</button>';
+
+  if (!isUrl) {
+    btnsHtml += '<button class="btn-dl" onclick="dlFile(\'' + f.url.replace(/'/g, "\\'") + '\',\'' + f.nombre.replace(/'/g, "\\'") + '\')">⬇️ Descargar</button>';
+  }
+
+  if (isAdmin) {
+    btnsHtml += '<button class="btn-del" id="bdel-' + f.id + '" onclick="deleteFile(' + f.id + ',\'' + f.url.replace(/'/g, "\\'") + '\',' + semId + ',\'' + (f.tipo || '') + '\')">🗑 Eliminar</button>';
+  }
+
+  row.innerHTML =
+    '<span class="file-name"><span class="file-name-icon">' + icon + '</span>' + escapeHtml(f.nombre) + '</span>' +
+    '<div class="file-btns">' + btnsHtml + '</div>';
+
+  return row;
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+// =============================================
+//  CONSTRUIR ZONA DE SUBIDA CON TABS
+// =============================================
+function buildUploadZone() {
+  var wrap = document.createElement('div');
+  wrap.style.marginTop = '1rem';
+
+  wrap.innerHTML =
+    '<div class="upload-tabs">' +
+      '<button class="upload-tab' + (activeTab === 'file' ? ' active' : '') + '" onclick="switchTab(\'file\')">📄 Subir archivo</button>' +
+      '<button class="upload-tab' + (activeTab === 'url'  ? ' active' : '') + '" onclick="switchTab(\'url\')">🔗 Agregar URL</button>' +
+    '</div>' +
+
+    /* PANEL ARCHIVO */
+    '<div class="upload-panel' + (activeTab === 'file' ? ' active' : '') + '" id="panelFile">' +
+      '<div class="upload-zone">' +
+        '<input type="file" id="fileInput" style="display:none" onchange="uploadFile(this)"/>' +
+        '<button class="btn-upload" onclick="document.getElementById(\'fileInput\').click()">+ Subir archivo</button>' +
+        '<p>PDF · DOCX · SQL · TXT · XLSX · cualquier formato · Max 50 MB</p>' +
+      '</div>' +
+    '</div>' +
+
+    /* PANEL URL */
+    '<div class="upload-panel' + (activeTab === 'url'  ? ' active' : '') + '" id="panelUrl">' +
+      '<span class="url-label-txt">Pega la URL (YouTube, Drive, GitHub, etc.)</span>' +
+      '<input type="url" class="field-input-sm" id="urlInput" placeholder="https://youtube.com/watch?v=..." />' +
+      '<div class="url-name-row">' +
+        '<input type="text" class="field-input-sm" id="urlName" placeholder="Nombre para mostrar (opcional)" />' +
+        '<button class="btn-add-url" onclick="addUrl()">+ Agregar</button>' +
+      '</div>' +
+    '</div>';
+
+  return wrap;
+}
+
+// =============================================
+//  CAMBIAR TAB
+// =============================================
+function switchTab(tab) {
+  activeTab = tab;
+  var tabs = document.querySelectorAll('.upload-tab');
+  tabs.forEach(function(t, i) {
+    t.classList.toggle('active', (i === 0 && tab === 'file') || (i === 1 && tab === 'url'));
+  });
+  var pFile = document.getElementById('panelFile');
+  var pUrl  = document.getElementById('panelUrl');
+  if (pFile) pFile.classList.toggle('active', tab === 'file');
+  if (pUrl)  pUrl.classList.toggle('active',  tab === 'url');
 }
 
 // =============================================
 //  MODAL — CERRAR CON ANIMACIÓN CARTA
 // =============================================
 function closeModal() {
-  const overlay = document.getElementById('modalOverlay');
-  const box     = document.getElementById('modalBox');
+  var overlay = document.getElementById('modalOverlay');
+  var box     = document.getElementById('modalBox');
 
   box.classList.remove('carta-abriendo');
   box.classList.add('carta-cerrando');
@@ -385,35 +469,36 @@ function closeModal() {
     box.classList.remove('carta-cerrando');
     document.body.style.overflow = '';
     currentSemId = null;
+    activeTab = 'file';
   }, 420);
 }
 
 // =============================================
 //  ELIMINAR ARCHIVO
 // =============================================
-async function deleteFile(fileId, fileUrl, semId) {
+async function deleteFile(fileId, fileUrl, semId, tipo) {
   if (!isAdmin) return;
   if (!confirm('¿Eliminar este archivo? Esta acción no se puede deshacer.')) return;
 
-  const btn = document.getElementById('bdel-' + fileId);
+  var btn = document.getElementById('bdel-' + fileId);
   if (btn) { btn.disabled = true; btn.textContent = '⏳'; }
 
   try {
-    // Extraer path del storage
-    const marker = '/portafolio-archivos/';
-    if (fileUrl.includes(marker)) {
-      const storagePath = fileUrl.split(marker)[1];
-      await withTimeout(db.storage.from('portafolio-archivos').remove([storagePath]));
+    // Solo borrar del storage si es un archivo real (no URL)
+    if (tipo !== 'url') {
+      var marker = '/portafolio-archivos/';
+      if (fileUrl.includes(marker)) {
+        var storagePath = fileUrl.split(marker)[1];
+        await withTimeout(db.storage.from('portafolio-archivos').remove([storagePath]));
+      }
     }
 
-    // Eliminar de la tabla
-    const { error } = await withTimeout(
+    var result = await withTimeout(
       db.from('archivos').delete().eq('id', fileId)
     );
-    if (error) throw error;
+    if (result.error) throw result.error;
 
-    // Animar salida y remover fila
-    const row = document.getElementById('frow-' + fileId);
+    var row = document.getElementById('frow-' + fileId);
     if (row) {
       row.style.transition = 'opacity 0.28s ease, transform 0.28s ease';
       row.style.opacity    = '0';
@@ -422,7 +507,7 @@ async function deleteFile(fileId, fileUrl, semId) {
     }
 
     fetchFileCount(semId);
-    showToast('🗑 Archivo eliminado correctamente');
+    showToast('🗑 Eliminado correctamente');
   } catch (err) {
     showToast('❌ Error: ' + err.message);
     if (btn) { btn.disabled = false; btn.textContent = '🗑 Eliminar'; }
@@ -433,7 +518,7 @@ async function deleteFile(fileId, fileUrl, semId) {
 //  DESCARGAR
 // =============================================
 function dlFile(url, nombre) {
-  const a    = document.createElement('a');
+  var a    = document.createElement('a');
   a.href     = url;
   a.download = nombre;
   a.target   = '_blank';
@@ -441,37 +526,97 @@ function dlFile(url, nombre) {
 }
 
 // =============================================
-//  SUBIR ARCHIVO
+//  SUBIR ARCHIVO — SIN SANITIZAR EL NOMBRE
 // =============================================
 async function uploadFile(input) {
-  const file = input.files[0];
+  var file = input.files[0];
   if (!file || !currentSemId) return;
 
   showToast('⏳ Subiendo archivo...');
-  const safeName = file.name
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-zA-Z0-9._-]/g, '_');
-  const path = 'semana-' + currentSemId + '/' + Date.now() + '-' + safeName;
+
+  // Usamos el nombre original tal cual, solo escapamos caracteres que
+  // rompen la ruta del storage (barras y nulos). El nombre de display
+  // queda intacto en la base de datos.
+  var originalName = file.name;
+  var safePath = originalName
+    .replace(/\//g, '_')
+    .replace(/\\/g, '_')
+    .replace(/\0/g, '_');
+
+  var path = 'semana-' + currentSemId + '/' + Date.now() + '-' + safePath;
 
   try {
-    const { error: upErr } = await withTimeout(
+    var upResult = await withTimeout(
       db.storage.from('portafolio-archivos').upload(path, file)
     );
-    if (upErr) throw upErr;
+    if (upResult.error) throw upResult.error;
 
-    const { data: urlData } = db.storage.from('portafolio-archivos').getPublicUrl(path);
+    var urlData = db.storage.from('portafolio-archivos').getPublicUrl(path);
 
-    const { error: dbErr } = await withTimeout(
+    var dbResult = await withTimeout(
       db.from('archivos').insert({
         semana_id: currentSemId,
-        nombre:    file.name,
-        url:       urlData.publicUrl,
-        tipo:      file.name.split('.').pop(),
+        nombre:    originalName,   // nombre tal cual el usuario lo tenía
+        url:       urlData.data.publicUrl,
+        tipo:      originalName.split('.').pop().toLowerCase(),
       })
     );
-    if (dbErr) throw dbErr;
+    if (dbResult.error) throw dbResult.error;
 
     showToast('✅ Archivo subido');
+    fetchFileCount(currentSemId);
+    openModal(currentSemId);
+  } catch (err) {
+    showToast('❌ ' + err.message);
+  }
+}
+
+// =============================================
+//  AGREGAR URL (YouTube, Drive, etc.)
+// =============================================
+async function addUrl() {
+  var urlVal  = (document.getElementById('urlInput')  || {}).value || '';
+  var nameVal = (document.getElementById('urlName')   || {}).value || '';
+
+  urlVal  = urlVal.trim();
+  nameVal = nameVal.trim();
+
+  if (!urlVal) {
+    showToast('⚠️ Escribe una URL primero');
+    return;
+  }
+
+  // Validar que sea una URL con protocolo
+  if (!urlVal.startsWith('http://') && !urlVal.startsWith('https://')) {
+    urlVal = 'https://' + urlVal;
+  }
+
+  // Nombre automático si no puso nada
+  if (!nameVal) {
+    try {
+      var hostname = new URL(urlVal).hostname.replace('www.', '');
+      nameVal = hostname;
+    } catch(e) {
+      nameVal = 'Enlace externo';
+    }
+  }
+
+  if (!currentSemId) return;
+
+  showToast('⏳ Guardando enlace...');
+
+  try {
+    var dbResult = await withTimeout(
+      db.from('archivos').insert({
+        semana_id: currentSemId,
+        nombre:    nameVal,
+        url:       urlVal,
+        tipo:      'url',
+      })
+    );
+    if (dbResult.error) throw dbResult.error;
+
+    showToast('✅ Enlace agregado');
     fetchFileCount(currentSemId);
     openModal(currentSemId);
   } catch (err) {
@@ -484,7 +629,7 @@ async function uploadFile(input) {
 // =============================================
 function showToast(msg, ms) {
   ms = ms || 3000;
-  const t = document.getElementById('toast');
+  var t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
   setTimeout(function() { t.classList.remove('show'); }, ms);
@@ -500,7 +645,7 @@ function setActiveNav(el) {
 
 window.addEventListener('scroll', function() {
   document.getElementById('navbar').style.boxShadow =
-    window.scrollY > 20 ? '0 4px 32px rgba(0,0,0,0.35)' : 'none';
+    window.scrollY > 20 ? '0 4px 32px rgba(0,0,0,0.35)' : '';
 });
 
 // =============================================
